@@ -1,0 +1,43 @@
+@model IEnumerable<TodoApp.Models.TodoTask>
+
+@{
+    ViewData["Title"] = "Lista Zadań";
+}
+
+<div class="container">
+    <h2 class="my-4">Zadania</h2>
+    <div class="form-group">
+        <label for="datePicker">Wybierz datę</label>
+        <input type="text" class="form-control datepicker" id="datePicker" placeholder="Wybierz datę" />
+    </div>
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Tytuł</th>
+                <th scope="col">Opis</th>
+                <th scope="col">Data wykonania</th>
+                <th scope="col">Stan</th>
+                <th scope="col">Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <th scope="row">@item.Id</th>
+                    <td>@item.Title</td>
+                    <td>@item.Description</td>
+                    <td>
+                        <input type="text" class="form-control datepicker" value="@item.DueDate.ToShortDateString()" />
+                    </td>
+                    <td>@item.IsCompleted ? "Zakończone" : "Niezakończone"</td>
+                    <td>
+                        <a class="btn btn-info" asp-action="Edit" asp-route-id="@item.Id">Edytuj</a>
+                        <a class="btn btn-secondary" asp-action="Details" asp-route-id="@item.Id">Szczegóły</a>
+                        <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Usuń</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
