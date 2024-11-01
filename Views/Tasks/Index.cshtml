@@ -2,13 +2,14 @@
 
 @{
     ViewData["Title"] = "Lista Zadań";
+    var today = DateTime.Today.ToString("yyyy-MM-dd");
 }
 
 <div class="container">
     <h2 class="my-4">Zadania</h2>
-    <div class="form-group">
+    <div class="form-group mb-4">
         <label for="datePicker">Wybierz datę</label>
-        <input type="text" class="form-control datepicker" id="datePicker" placeholder="Wybierz datę" />
+        <input type="text" class="form-control datepicker" id="datePicker" value="@today" placeholder="Wybierz datę" />
     </div>
     <table class="table table-dark">
         <thead>
@@ -41,3 +42,14 @@
             }
         </tbody>
     </table>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Ustawienie dzisiejszej daty w kalendarzu
+        $('.datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true
+        }).datepicker('setDate', new Date());
+    });
+</script>
