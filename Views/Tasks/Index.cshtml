@@ -2,19 +2,23 @@
 
 @{
     ViewData["Title"] = "Lista Zadań";
-    var today = DateTime.Today.ToString("yyyy-MM-dd");
+    var selectedDate = ViewBag.SelectedDate ?? DateTime.Today.ToString("yyyy-MM-dd");
 }
 
 <div class="container">
     <h2 class="my-4">Zadania</h2>
-    <div class="form-group mb-4">
-        <label for="datePicker">Wybierz datę</label>
-        <input type="text" class="form-control datepicker" id="datePicker" value="@today" placeholder="Wybierz datę" />
+    <form asp-controller="Tasks" asp-action="Index" method="get">
+        <div class="form-group mb-4">
+            <label for="datePicker">Wybierz datę</label>
+            <input type="text" class="form-control datepicker" id="datePicker" name="selectedDate" value="@selectedDate" placeholder="Wybierz datę" onchange="this.form.submit();" />
+        </div>
+    </form>
+    <div class="mb-4">
+        <a href="@Url.Action("Create", "Tasks")" class="btn btn-primary">Dodaj nowe zadanie</a>
     </div>
     <table class="table table-dark">
         <thead>
             <tr>
-                <th scope="col">#</th>
                 <th scope="col">Tytuł</th>
                 <th scope="col">Opis</th>
                 <th scope="col">Data wykonania</th>
@@ -25,18 +29,14 @@
         <tbody>
             @foreach (var item in Model)
             {
-                <tr>
-                    <th scope="row">@item.Id</th>
+                <tr id="task-@item.Id">
                     <td>@item.Title</td>
                     <td>@item.Description</td>
+                    <td>@item.DueDate.ToShortDateString()</td>
+                    <td>@(item.IsCompleted ? "Zakończone" : "Niezakończone")</td>
                     <td>
-                        <input type="text" class="form-control datepicker" value="@item.DueDate.ToShortDateString()" />
-                    </td>
-                    <td>@item.IsCompleted ? "Zakończone" : "Niezakończone"</td>
-                    <td>
-                        <a class="btn btn-info" asp-action="Edit" asp-route-id="@item.Id">Edytuj</a>
-                        <a class="btn btn-secondary" asp-action="Details" asp-route-id="@item.Id">Szczegóły</a>
-                        <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Usuń</a>
+                        <a class="btn btn-info" asp-action="Edit" asp-route-id="@item.Id" asp-route-selectedDate="@ViewBag.SelectedDate">Edytuj</a>
+                        <button class="btn btn-danger" onclick="deleteTask(@item.Id)">Usuń</button>
                     </td>
                 </tr>
             }
@@ -46,10 +46,26 @@
 
 <script>
     $(document).ready(function() {
-        // Ustawienie dzisiejszej daty w kalendarzu
-        $('.datepicker').datepicker({
+        var selectedDate = '@selectedDate';
+        $('#datePicker').datepicker({
             format: 'yyyy-mm-dd',
             autoclose: true
-        }).datepicker('setDate', new Date());
+        }).datepicker('setDate', selectedDate);
     });
+
+    function deleteTask(taskId) {
+        if (confirm('Czy na pewno chcesz usunąć to zadanie?')) {
+            $.ajax({
+                url: '@Url.Action("DeleteTask", "Tasks")',
+                type: 'POST',
+                data: { id: taskId },
+                success: function() {
+                    $('#task-' + taskId).remove();
+                },
+                error: function() {
+                    alert('Wystąpił błąd podczas usuwania zadania.');
+                }
+            });
+        }
+    }
 </script>

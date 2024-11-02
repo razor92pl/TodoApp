@@ -7,6 +7,10 @@ namespace TodoApp.Data
     {
         public DbSet<TodoTask> Tasks { get; set; }
 
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        {
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlite("Data Source=tasks.db");

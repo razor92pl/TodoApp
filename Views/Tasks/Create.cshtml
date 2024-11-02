@@ -1,0 +1,38 @@
+@model TodoApp.Models.TodoTask
+
+@{
+    ViewData["Title"] = "Utwórz zadanie";
+}
+
+<div class="container">
+    <h2 class="my-4">Utwórz nowe zadanie</h2>
+    <form asp-action="Create" method="post">
+        <div class="form-group">
+            <label for="Title">Tytuł</label>
+            <input type="text" class="form-control" id="Title" name="Title" value="@Model?.Title" required />
+        </div>
+        <div class="form-group">
+            <label for="Description">Opis</label>
+            <textarea class="form-control" id="Description" name="Description">@Model?.Description</textarea>
+        </div>
+        <div class="form-group">
+            <label for="DueDate">Data wykonania</label>
+            <input type="text" class="form-control datepicker" id="DueDate" name="DueDate" value="@Model?.DueDate.ToString("yyyy-MM-dd")" required />
+        </div>
+        <div class="form-group form-check">
+            <input type="checkbox" class="form-check-input" id="IsCompleted" name="IsCompleted" value="true" />
+            <label class="form-check-label" for="IsCompleted">Zakończone</label>
+            <input type="hidden" name="IsCompleted" value="false" />
+        </div>
+        <button type="submit" class="btn btn-primary">Utwórz</button>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('.datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true
+        }).datepicker('setDate', new Date());
+    });
+</script>
