@@ -11,8 +11,15 @@
 
     @if (ViewBag.Notification != null)
     {
-        <div class="alert alert-warning" role="alert">
+        <div class="alert alert-danger" role="alert">
             @ViewBag.Notification
+        </div>
+    }
+
+    @if (ViewBag.TomorrowNotification != null)
+    {
+        <div class="alert alert-warning" role="alert">
+            @ViewBag.TomorrowNotification
         </div>
     }
 
@@ -124,3 +131,4 @@
         }
     }
 </script>
+

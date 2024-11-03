@@ -27,6 +27,7 @@ namespace TodoApp.Controllers
             ViewBag.SelectedDate = selectedDate.Value.ToString("yyyy-MM-dd");
             ViewBag.Filter = filter;
             var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
 
             var tasks = from t in _context.Tasks select t;
             tasks = tasks.Where(t => t.DueDate.Date == selectedDate.Value.Date);
@@ -44,7 +45,7 @@ namespace TodoApp.Controllers
                     break;
             }
 
-            // sprawdzanie niewykonanych zadan z poprzednich dni
+            // Powiadomienia o niewykonanych zadaniach z poprzednich dni
             var incompleteTasks = await _context.Tasks
                 .Where(t => !t.IsCompleted && t.DueDate.Date < today)
                 .GroupBy(t => t.DueDate.Date)
@@ -59,6 +60,17 @@ namespace TodoApp.Controllers
                     message += $"{task.Date.ToShortDateString()} ({task.Count} zadań), ";
                 }
                 ViewBag.Notification = message.TrimEnd(',', ' ');
+            }
+
+            // Powiadomienia o zadaniach do wykonania jutro
+            var tomorrowTasks = await _context.Tasks
+                .Where(t => !t.IsCompleted && t.DueDate.Date == tomorrow)
+                .ToListAsync();
+
+            if (tomorrowTasks.Any())
+            {
+                var message = $"Jutro masz {tomorrowTasks.Count} zadań do wykonania.";
+                ViewBag.TomorrowNotification = message;
             }
 
             return View(await tasks.ToListAsync());
