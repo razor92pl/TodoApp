@@ -26,6 +26,7 @@ namespace TodoApp.Controllers
 
             ViewBag.SelectedDate = selectedDate.Value.ToString("yyyy-MM-dd");
             ViewBag.Filter = filter;
+            var today = DateTime.Today;
 
             var tasks = from t in _context.Tasks select t;
             tasks = tasks.Where(t => t.DueDate.Date == selectedDate.Value.Date);
@@ -41,6 +42,23 @@ namespace TodoApp.Controllers
                 case "all":
                 default:
                     break;
+            }
+
+            // sprawdzanie niewykonanych zadan z poprzednich dni
+            var incompleteTasks = await _context.Tasks
+                .Where(t => !t.IsCompleted && t.DueDate.Date < today)
+                .GroupBy(t => t.DueDate.Date)
+                .Select(group => new { Date = group.Key, Count = group.Count() })
+                .ToListAsync();
+
+            if (incompleteTasks.Any())
+            {
+                var message = "Masz niewykonane zadania z dni: ";
+                foreach (var task in incompleteTasks)
+                {
+                    message += $"{task.Date.ToShortDateString()} ({task.Count} zadań), ";
+                }
+                ViewBag.Notification = message.TrimEnd(',', ' ');
             }
 
             return View(await tasks.ToListAsync());

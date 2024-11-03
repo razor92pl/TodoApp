@@ -8,6 +8,14 @@
 
 <div class="container">
     <h2 class="my-4">Zadania</h2>
+
+    @if (ViewBag.Notification != null)
+    {
+        <div class="alert alert-warning" role="alert">
+            @ViewBag.Notification
+        </div>
+    }
+
     <form asp-controller="Tasks" asp-action="Index" method="get">
         <div class="form-group mb-4">
             <label for="datePicker">Wybierz datę</label>
@@ -21,8 +29,8 @@
                 <label for="filter" style="margin-right: 20px;">Pokaż:</label>
                 <select id="filter" class="form-control" style="width: 150px;" name="filter" onchange="this.form.submit();">
                     <option value="all" selected="@(filter == "all" ? "selected" : null)">Wszystkie</option>
-<option value="completed" selected="@(filter == "completed" ? "selected" : null)">Wykonane</option>
-<option value="pending" selected="@(filter == "pending" ? "selected" : null)">Do wykonania</option>
+                    <option value="completed" selected="@(filter == "completed" ? "selected" : null)">Wykonane</option>
+                    <option value="pending" selected="@(filter == "pending" ? "selected" : null)">Do wykonania</option>
                 </select>
                 <button type="button" class="btn btn-danger" style="height: 38px;" onclick="deleteFilteredTasks()">Usuń wyświetlone</button>
             </div>
