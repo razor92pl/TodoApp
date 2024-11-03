@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Lista Zadań";
     var selectedDate = ViewBag.SelectedDate ?? DateTime.Today.ToString("yyyy-MM-dd");
+    var filter = ViewBag.Filter ?? "all";
 }
 
 <div class="container">
@@ -12,10 +13,21 @@
             <label for="datePicker">Wybierz datę</label>
             <input type="text" class="form-control datepicker" id="datePicker" name="selectedDate" value="@selectedDate" placeholder="Wybierz datę" onchange="this.form.submit();" />
         </div>
+        <div class="form-group mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <a href="@Url.Action("Create", "Tasks")" class="btn btn-primary">Dodaj nowe zadanie</a>
+            </div>
+            <div class="d-flex align-items-center" style="gap: 10px;">
+                <label for="filter" style="margin-right: 20px;">Pokaż:</label>
+                <select id="filter" class="form-control" style="width: 150px;" name="filter" onchange="this.form.submit();">
+                    <option value="all" selected="@(filter == "all" ? "selected" : null)">Wszystkie</option>
+<option value="completed" selected="@(filter == "completed" ? "selected" : null)">Wykonane</option>
+<option value="pending" selected="@(filter == "pending" ? "selected" : null)">Do wykonania</option>
+                </select>
+                <button type="button" class="btn btn-danger" style="height: 38px;" onclick="deleteFilteredTasks()">Usuń wyświetlone</button>
+            </div>
+        </div>
     </form>
-    <div class="mb-4">
-        <a href="@Url.Action("Create", "Tasks")" class="btn btn-primary">Dodaj nowe zadanie</a>
-    </div>
     <table class="table table-dark">
         <thead>
             <tr>
@@ -26,10 +38,10 @@
                 <th scope="col">Akcje</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="task-list">
             @foreach (var item in Model)
             {
-                <tr id="task-@item.Id" class="@(item.IsCompleted ? "table-success" : "")">
+                <tr id="task-@item.Id" class="@(item.IsCompleted ? "table-success" : "")" data-status="@(item.IsCompleted ? "completed" : "pending")">
                     <td>@item.Title</td>
                     <td>@item.Description</td>
                     <td>@item.DueDate.ToShortDateString()</td>
@@ -51,7 +63,24 @@
             format: 'yyyy-mm-dd',
             autoclose: true
         }).datepicker('setDate', selectedDate);
+
+        $('#filter').change(function() {
+            filterTasks($(this).val());
+        });
+
+        filterTasks($('#filter').val()); // Ensure tasks are filtered on load
     });
+
+    function filterTasks(filterValue) {
+        $('#task-list tr').each(function() {
+            var taskStatus = $(this).data('status');
+            if (filterValue === 'all' || taskStatus === filterValue) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
 
     function deleteTask(taskId) {
         if (confirm('Czy na pewno chcesz usunąć to zadanie?')) {
@@ -64,6 +93,24 @@
                 },
                 error: function() {
                     alert('Wystąpił błąd podczas usuwania zadania.');
+                }
+            });
+        }
+    }
+
+    function deleteFilteredTasks() {
+        var filterValue = $('#filter').val();
+        var selectedDate = $('#datePicker').val();
+        if (confirm('Czy na pewno chcesz usunąć wszystkie wyświetlone zadania?')) {
+            $.ajax({
+                url: '@Url.Action("DeleteFilteredTasks", "Tasks")',
+                type: 'POST',
+                data: { selectedDate: selectedDate, filter: filterValue },
+                success: function() {
+                    $('#task-list tr:visible').remove();
+                },
+                error: function() {
+                    alert('Wystąpił błąd podczas usuwania zadań.');
                 }
             });
         }

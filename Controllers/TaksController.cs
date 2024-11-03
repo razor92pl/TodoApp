@@ -17,7 +17,7 @@ namespace TodoApp.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(DateTime? selectedDate)
+        public async Task<IActionResult> Index(DateTime? selectedDate, string filter = "all")
         {
             if (!selectedDate.HasValue)
             {
@@ -25,9 +25,23 @@ namespace TodoApp.Controllers
             }
 
             ViewBag.SelectedDate = selectedDate.Value.ToString("yyyy-MM-dd");
+            ViewBag.Filter = filter;
 
             var tasks = from t in _context.Tasks select t;
             tasks = tasks.Where(t => t.DueDate.Date == selectedDate.Value.Date);
+
+            switch (filter)
+            {
+                case "completed":
+                    tasks = tasks.Where(t => t.IsCompleted);
+                    break;
+                case "pending":
+                    tasks = tasks.Where(t => !t.IsCompleted);
+                    break;
+                case "all":
+                default:
+                    break;
+            }
 
             return View(await tasks.ToListAsync());
         }
@@ -50,7 +64,6 @@ namespace TodoApp.Controllers
             return View(task);
         }
 
-        // GET: Tasks/Edit/5
         public async Task<IActionResult> Edit(int? id, string selectedDate)
         {
             if (id == null)
@@ -68,7 +81,6 @@ namespace TodoApp.Controllers
             return View(task);
         }
 
-        // POST: Tasks/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,DueDate,IsCompleted")] TodoTask task, string selectedDate)
@@ -102,7 +114,6 @@ namespace TodoApp.Controllers
             return View(task);
         }
 
-        // POST: Tasks/Delete/5
         [HttpPost]
         public async Task<IActionResult> DeleteTask(int id)
         {
@@ -113,6 +124,30 @@ namespace TodoApp.Controllers
             }
 
             _context.Tasks.Remove(task);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteFilteredTasks(DateTime selectedDate, string filter)
+        {
+            var tasks = from t in _context.Tasks select t;
+            tasks = tasks.Where(t => t.DueDate.Date == selectedDate.Date);
+
+            switch (filter)
+            {
+                case "completed":
+                    tasks = tasks.Where(t => t.IsCompleted);
+                    break;
+                case "pending":
+                    tasks = tasks.Where(t => !t.IsCompleted);
+                    break;
+                case "all":
+                default:
+                    break;
+            }
+
+            _context.Tasks.RemoveRange(tasks);
             await _context.SaveChangesAsync();
             return Ok();
         }
