@@ -10,10 +10,19 @@ var options = new WebApplicationOptions
 
 var builder = WebApplication.CreateBuilder(options);
 
+// Pobierz ConnectionString z konfiguracji
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Połącz bazę danych z pełną ścieżką względem katalogu aplikacji
+var dbPath = Path.Combine(AppContext.BaseDirectory, connectionString.Replace("Data Source=", ""));
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite($"Data Source={dbPath}"));
+
+// Logowanie ścieżki do bazy danych dla pewności
+Console.WriteLine($"Using database at: {dbPath}");
 
 var app = builder.Build();
 
