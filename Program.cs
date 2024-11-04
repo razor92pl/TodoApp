@@ -11,7 +11,8 @@ var options = new WebApplicationOptions
 var builder = WebApplication.CreateBuilder(options);
 
 // Pobierz ConnectionString z konfiguracji
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 // Połącz bazę danych z pełną ścieżką względem katalogu aplikacji
 var dbPath = Path.Combine(AppContext.BaseDirectory, connectionString.Replace("Data Source=", ""));

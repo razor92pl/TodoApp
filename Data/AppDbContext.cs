@@ -11,9 +11,11 @@ namespace TodoApp.Data
         {
         }
 
+/*
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlite("Data Source=tasks.db");
         }
+        */
     }
 }
